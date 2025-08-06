@@ -2,134 +2,88 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Kasir Obat - Bootstrap</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Kasir Obat</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body class="bg-light">
-
-<div class="container py-4">
-  <div class="card shadow">
-    <div class="card-body">
-      <h3 class="card-title text-center mb-4">Kasir Obat</h3>
-
-      <!-- Obat Selection -->
+  <div class="container py-5">
+    <h2 class="mb-4">Form Tambah Obat</h2>
+    <form id="obatForm" class="bg-white p-4 rounded shadow">
       <div class="mb-3">
-        <label for="barang" class="form-label">Pilih Obat</label>
-        <select id="barang" class="form-select"></select>
+        <label for="nama" class="form-label">Nama Obat</label>
+        <input type="text" class="form-control" id="nama" required>
       </div>
-
       <div class="mb-3">
-        <label for="jumlah" class="form-label">Jumlah</label>
-        <input type="number" class="form-control" id="jumlah" value="1" min="1" />
+        <label for="qty" class="form-label">Jumlah (Qty)</label>
+        <input type="number" class="form-control" id="qty" required>
       </div>
-
       <div class="mb-3">
-        <div id="total" class="fs-5 fw-bold">Total Harga: Rp 0</div>
+        <label for="satuan" class="form-label">Satuan</label>
+        <input type="text" class="form-control" id="satuan" required>
       </div>
-
-      <button onclick="kirimWhatsApp()" class="btn btn-success w-100">Kirim ke WhatsApp</button>
-    </div>
+      <div class="mb-3">
+        <label for="harga" class="form-label">Harga Satuan</label>
+        <input type="number" class="form-control" id="harga" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Simpan</button>
+      <button type="button" class="btn btn-success" id="exportPDF">Export ke PDF</button>
+    </form>
+    <div id="result" class="mt-4"></div>
   </div>
 
-  <!-- Form Tambah Obat -->
-  <div class="card mt-4 shadow-sm">
-    <div class="card-body">
-      <h5 class="card-title">Tambah Obat Baru</h5>
-      <form id="form-obat">
-        <div class="mb-3">
-          <label for="nama-obat" class="form-label">Nama Obat</label>
-          <input type="text" class="form-control" id="nama-obat" required>
-        </div>
-        <div class="mb-3">
-          <label for="harga-obat" class="form-label">Harga Obat</label>
-          <input type="number" class="form-control" id="harga-obat" required>
-        </div>
-        <button type="submit" class="btn btn-primary w-100">Tambah & Simpan</button>
-      </form>
-    </div>
-  </div>
-</div>
+  <script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwfMYM7rcnvaFFoPQRo4pqh_BA-6fiVy9bpht2n38yBXZd-UoZxH2gKIihQjHYbY-wBWw/exec';
 
-<!-- Bootstrap JS Bundle -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    document.getElementById("obatForm").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const nama = document.getElementById("nama").value;
+      const qty = document.getElementById("qty").value;
+      const satuan = document.getElementById("satuan").value;
+      const harga = document.getElementById("harga").value;
 
-<script>
-  const barangSelect = document.getElementById("barang");
-  const jumlahInput = document.getElementById("jumlah");
-  const totalDiv = document.getElementById("total");
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ nama, qty, satuan, harga })
+        });
 
-  const barangHarga = {
-    "ACYCLOVIR 400": 57000,
-    "ACYCLOVIR CR": 4000,
-    "ALLOPURINOL": 20500,
-    "AMLODIPIN 10MG HJ": 48500,
-    "AMLODIPIN 5MG HJ": 26500
-  };
+        const result = await response.json();
+        document.getElementById("result").innerHTML =
+          result.result === "success"
+            ? `<div class="alert alert-success">Data berhasil disimpan!</div>`
+            : `<div class="alert alert-danger">Gagal: ${result.message}</div>`;
 
-  function updateBarangDropdown() {
-    barangSelect.innerHTML = "";
-    Object.keys(barangHarga).forEach(nama => {
-      const option = document.createElement("option");
-      option.value = nama;
-      option.textContent = `${nama} - Rp ${barangHarga[nama].toLocaleString("id-ID")}`;
-      barangSelect.appendChild(option);
+        if (result.result === "success") document.getElementById("obatForm").reset();
+
+      } catch (error) {
+        document.getElementById("result").innerHTML =
+          `<div class="alert alert-danger">Error: ${error.message}</div>`;
+      }
     });
-    hitungTotal();
-  }
 
-  function hitungTotal() {
-    const nama = barangSelect.value;
-    const harga = barangHarga[nama] || 0;
-    const jumlah = parseInt(jumlahInput.value) || 0;
-    const total = harga * jumlah;
-    totalDiv.textContent = "Total Harga: Rp " + total.toLocaleString("id-ID");
-  }
+    document.getElementById("exportPDF").addEventListener("click", () => {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
 
-  barangSelect.addEventListener("change", hitungTotal);
-  jumlahInput.addEventListener("input", hitungTotal);
+      const nama = document.getElementById("nama").value;
+      const qty = document.getElementById("qty").value;
+      const satuan = document.getElementById("satuan").value;
+      const harga = document.getElementById("harga").value;
 
-  function kirimWhatsApp() {
-    const nama = barangSelect.value;
-    const jumlah = jumlahInput.value;
-    const total = barangHarga[nama] * jumlah;
-    const pesan = `Pesanan Obat:%0A${nama} x ${jumlah}%0ATotal: Rp ${total.toLocaleString("id-ID")}`;
-    const noWA = "6281234567890"; // ganti dengan nomor WA kamu
-    const url = `https://wa.me/${noWA}?text=${pesan}`;
-    window.open(url, "_blank");
-  }
+      doc.setFontSize(14);
+      doc.text("Data Obat", 10, 10);
+      doc.text(`Nama: ${nama}`, 10, 20);
+      doc.text(`Qty: ${qty}`, 10, 30);
+      doc.text(`Satuan: ${satuan}`, 10, 40);
+      doc.text(`Harga: Rp ${harga}`, 10, 50);
 
-  const formObat = document.getElementById("form-obat");
-  formObat.addEventListener("submit", function (e) {
-    e.preventDefault();
-    const nama = document.getElementById("nama-obat").value.trim();
-    const harga = parseInt(document.getElementById("harga-obat").value);
-
-    if (!nama || isNaN(harga)) {
-      alert("Isi nama dan harga dengan benar!");
-      return;
-    }
-
-    barangHarga[nama] = harga;
-    updateBarangDropdown();
-    barangSelect.value = nama;
-    hitungTotal();
-
-    fetch("https://script.google.com/macros/s/AKfycbx53CTR3mdd5xobToY9HTiagoXWEuXtJpci2rYkZQb9SH5o0tkwVe95o-VUL-igHMUTSg/exec", {
-      method: "POST",
-      body: JSON.stringify({ nama, harga }),
-      headers: { "Content-Type": "application/json" }
-    }).then(res => res.text()).then(res => {
-      alert("Obat berhasil ditambahkan dan disimpan!");
-      formObat.reset();
-    }).catch(err => {
-      alert("Gagal menyimpan ke Google Sheets.");
-      console.error(err);
+      doc.save(`data_obat_${nama}.pdf`);
     });
-  });
-
-  updateBarangDropdown();
-</script>
+  </script>
 </body>
 </html>
