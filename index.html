@@ -1,96 +1,151 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Kasir Obat</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Select2 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+  <style>
+    body { padding: 20px; }
+    .select2-container { width: 100% !important; }
+    #keranjang-table th, #keranjang-table td { vertical-align: middle; }
+  </style>
 </head>
-<body class="bg-light">
+<body>
 
-<div class="container py-4">
-  <div class="card shadow">
-    <div class="card-body">
-      <h3 class="card-title text-center mb-4">Kasir Obat</h3>
-
-      <!-- Obat Selection -->
-      <div class="mb-3">
-        <label for="barang" class="form-label">Pilih Obat</label>
+  <div class="container">
+    <h2>Kasir Obat</h2>
+    <div class="row my-4">
+      <div class="col-md-6">
+        <label for="barang">Pilih Obat:</label>
         <select id="barang" class="form-select"></select>
       </div>
-
-      <div class="mb-3">
-        <label for="jumlah" class="form-label">Jumlah</label>
-        <input type="number" class="form-control" id="jumlah" value="1" min="1" />
+      <div class="col-md-2">
+        <label for="jumlah">Jumlah:</label>
+        <input type="number" id="jumlah" class="form-control" value="1" min="1">
       </div>
-
-      <div class="mb-3">
-        <div id="total" class="fs-5 fw-bold">Total Harga: Rp 0</div>
+      <div class="col-md-2 align-self-end">
+        <button id="tambah" class="btn btn-primary w-100">+ Tambah</button>
       </div>
-
-      <button onclick="exportPDF()" class="btn btn-danger w-100">Export ke PDF</button>
     </div>
+
+    <table class="table table-bordered" id="keranjang-table">
+      <thead class="table-light">
+        <tr>
+          <th>Obat</th>
+          <th>Jumlah</th>
+          <th>Harga Satuan</th>
+          <th>Subtotal</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="keranjang-body">
+      </tbody>
+      <tfoot>
+        <tr>
+          <th colspan="3" class="text-end">Total:</th>
+          <th id="total-harga">Rp 0</th>
+          <th></th>
+        </tr>
+      </tfoot>
+    </table>
+
+    <button id="export-pdf" class="btn btn-success">Export ke PDF</button>
   </div>
-</div>
 
-<!-- jsPDF for PDF Export -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<!-- Bootstrap JS Bundle -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- JS Libraries -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-<script>
-  const barangSelect = document.getElementById("barang");
-  const jumlahInput = document.getElementById("jumlah");
-  const totalDiv = document.getElementById("total");
+  <script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzOcpc3Fsfq1XuKZgP-6uypNEodhCJsR7zNG6xXvXZv5eZ8vjOmmYj9cl1xfCJiCllvqA/exec'; // ganti dengan URL Web Apps kamu
+    let dataObat = [];
+    const keranjang = [];
 
-  const barangHarga = {};
-
-  async function loadDataObat() {
-    try {
-      const response = await fetch("https://script.google.com/macros/s/AKfycbw8oh36HiwJcFFEsD64cUl6NYV85EatDziBAUEmv-NjIIQorXCwI7cFscCzePsMPSXYtA/exec"); // Ganti dengan URL Web App kamu
-      const data = await response.json();
-      barangSelect.innerHTML = "";
-      data.forEach(obat => {
-        barangHarga[obat["Nama Obat"]] = obat["Harga"];
-        const option = document.createElement("option");
-        option.value = obat["Nama Obat"];
-        option.textContent = `${obat["Nama Obat"]} - Rp ${obat["Harga"].toLocaleString("id-ID")}`;
-        barangSelect.appendChild(option);
+    // Ambil data dari Google Sheets
+    fetch(SCRIPT_URL)
+      .then(res => res.json())
+      .then(data => {
+        dataObat = data;
+        const barangSelect = document.getElementById('barang');
+        data.forEach(obat => {
+          const option = document.createElement('option');
+          option.value = obat.nama;
+          option.dataset.harga = obat.harga;
+          option.text = `${obat.nama} - Rp ${Number(obat.harga).toLocaleString('id-ID')}`;
+          barangSelect.add(option);
+        });
+        $('#barang').select2({ placeholder: "Pilih obat" });
       });
-      hitungTotal();
-    } catch (error) {
-      console.error("Gagal memuat data obat:", error);
+
+    function updateKeranjangTable() {
+      const tbody = document.getElementById('keranjang-body');
+      tbody.innerHTML = '';
+      let total = 0;
+
+      keranjang.forEach((item, index) => {
+        const subtotal = item.harga * item.jumlah;
+        total += subtotal;
+
+        const row = `
+          <tr>
+            <td>${item.nama}</td>
+            <td>${item.jumlah}</td>
+            <td>Rp ${item.harga.toLocaleString('id-ID')}</td>
+            <td>Rp ${subtotal.toLocaleString('id-ID')}</td>
+            <td><button class="btn btn-sm btn-danger" onclick="hapusItem(${index})">Hapus</button></td>
+          </tr>
+        `;
+        tbody.innerHTML += row;
+      });
+
+      document.getElementById('total-harga').innerText = 'Rp ' + total.toLocaleString('id-ID');
     }
-  }
 
-  function hitungTotal() {
-    const nama = barangSelect.value;
-    const harga = barangHarga[nama] || 0;
-    const jumlah = parseInt(jumlahInput.value) || 0;
-    const total = harga * jumlah;
-    totalDiv.textContent = "Total Harga: Rp " + total.toLocaleString("id-ID");
-  }
+    function hapusItem(index) {
+      keranjang.splice(index, 1);
+      updateKeranjangTable();
+    }
 
-  barangSelect.addEventListener("change", hitungTotal);
-  jumlahInput.addEventListener("input", hitungTotal);
+    document.getElementById('tambah').addEventListener('click', () => {
+      const select = document.getElementById('barang');
+      const nama = select.value;
+      const jumlah = parseInt(document.getElementById('jumlah').value) || 1;
+      const harga = parseInt(select.options[select.selectedIndex].dataset.harga) || 0;
 
-  async function exportPDF() {
-    const {{ jsPDF }} = window.jspdf;
-    const doc = new jsPDF();
-    const nama = barangSelect.value;
-    const jumlah = jumlahInput.value;
-    const total = barangHarga[nama] * jumlah;
+      if (!nama) return alert('Silakan pilih obat');
 
-    doc.text("Struk Pembelian Obat", 20, 20);
-    doc.text(`Obat: ${nama}`, 20, 30);
-    doc.text(`Jumlah: ${jumlah}`, 20, 40);
-    doc.text(`Total Harga: Rp ${total.toLocaleString("id-ID")}`, 20, 50);
+      keranjang.push({ nama, jumlah, harga });
+      updateKeranjangTable();
+    });
 
-    doc.save("struk_obat.pdf");
-  }
+    document.getElementById('export-pdf').addEventListener('click', () => {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
 
-  loadDataObat();
-</script>
+      doc.setFontSize(14);
+      doc.text("Struk Pembelian Obat", 20, 20);
+
+      let y = 30;
+      let total = 0;
+
+      keranjang.forEach((item, i) => {
+        const subtotal = item.jumlah * item.harga;
+        total += subtotal;
+        doc.text(`${i + 1}. ${item.nama} x${item.jumlah} - Rp ${subtotal.toLocaleString('id-ID')}`, 20, y);
+        y += 10;
+      });
+
+      doc.text(`Total: Rp ${total.toLocaleString('id-ID')}`, 20, y + 10);
+      doc.save("struk_obat.pdf");
+    });
+  </script>
 </body>
 </html>
