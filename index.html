@@ -60,6 +60,7 @@
       </div>
 
       <button class="btn btn-primary mb-4" onclick="tambahObat()">Tambah ke Keranjang</button>
+      <button onclick="Reset()">Reset</button>
 
       <h5>Keranjang</h5>
       <div id="keranjangWrapper">
@@ -149,13 +150,11 @@
         });
     });
 
-    function tambahObat() {
-      const nama = document.getElementById("obat").value;
-      const jumlah = parseInt(document.getElementById("jumlah").value);
-      const harga = daftarObat[nama];
-      keranjang.push({ nama, harga, jumlah });
-      renderKeranjang();
-    }
+    function resetKeranjang() {
+      keranjang = [];
+      updateKeranjang();
+      }
+
 
     function renderKeranjang() {
       const tbody = document.querySelector("#keranjang tbody");
