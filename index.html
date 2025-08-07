@@ -2,201 +2,151 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Kasir Apotek</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      margin: 20px;
-    }
-    select, button {
-      padding: 8px;
-      margin-right: 10px;
-      font-size: 16px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: left;
-    }
-    th {
-      background-color: #f0f0f0;
-    }
-    .total {
-      font-weight: bold;
-      font-size: 18px;
-      margin-top: 10px;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apotek Meysha</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
-<body>
+<body class="bg-light">
+  <div class="container py-4">
+    <h2 class="text-center mb-4">Apotek Meysha</h2>
 
-  <h1>Kasir Apotek</h1>
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label for="obat" class="form-label">Pilih Obat</label>
+        <select id="obat" class="form-select">
+          <!-- Daftar obat (nama dan harga) -->
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label for="jumlah" class="form-label">Jumlah</label>
+        <input type="number" id="jumlah" class="form-control" value="1" min="1">
+      </div>
+      <div class="col-md-3 d-flex align-items-end">
+        <button class="btn btn-primary w-100" onclick="tambahKeranjang()">Tambah ke Keranjang</button>
+      </div>
+    </div>
 
-  <select id="obatSelect">
-    <option value="">-- Pilih Obat --</option>
-  </select>
-  <button onclick="tambahObat()">Tambah ke Keranjang</button>
-  <button onclick="resetKeranjang()">Reset</button>
+    <div id="keranjang-container" class="bg-white p-4 shadow-sm rounded">
+      <h4>Keranjang</h4>
+      <ul id="keranjang" class="list-group mb-3"></ul>
+      <h5>Total: Rp <span id="total">0</span></h5>
+    </div>
 
-  <table id="keranjang">
-    <thead>
-      <tr>
-        <th>Nama Obat</th>
-        <th>Harga</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-  <div class="total" id="totalHarga">Total: Rp 0</div>
+    <div class="text-center mt-4">
+      <button class="btn btn-success" onclick="saveToPDF()">Save to PDF</button>
+      <button class="btn btn-info" onclick="saveAsImage()">Save as Image (PNG)</button>
+      <button class="btn btn-secondary" onclick="printPage()">Print</button>
+      <button class="btn btn-danger" onclick="resetKeranjang()">Reset Keranjang</button>
+    </div>
+  </div>
 
   <script>
     const daftarObat = {
-      "ACYCLOVIR 400": 56500,
-      "ACYCLOVIR CR": 4000,
-      "ALLOPURINOL": 20500,
-      "AMLODIPIN 10MG HJ": 49000,
-      "AMLODIPIN 5MG HJ": 26500,
-      "ANDALAN PIL": 15500,
-      "ANTASIDA POT": 9000,
-      "AXAPROFEN": 44000,
-      "BINTAMOX SYR": 9000,
-      "BIOPLACENTON": 29000,
-      "CALCIFAR": 21000,
-      "CALCIFAR PLUS": 23000,
-      "CAVIPLEX SYR": 12000,
-      "CEFIXIM SYR": 11000,
-      "CETERIZIN": 24500,
-      "CETERIZIN SYR": 5500,
-      "COMBANTRIN CAIR": 27500,
-      "CTM": 10000,
-      "CTM POT": 4000,
-      "DEXAMETHASON 0,5": 9000,
-      "DEXTAF": 20500,
-      "DEXTEEM PLUS": 31500,
-      "DICLOFENAC SODIUM": 21000,
-      "EMTURNAS TAB": 23500,
-      "ERLA SM": 12000,
-      "ERLA TM": 12000,
-      "ERPHAFLAM": 23000,
-      "ETABION": 29000,
-      "ETAMOX": 60500,
-      "ETAMOX FORTE SYR": 10500,
-      "ETAMOX SYR": 7500,
-      "FASIDOL FORTE SYR": 8000,
-      "FLACOID 0,5 POT": 5500,
-      "FLUCADEX SYR": 10500,
-      "GASTRUCID SYR": 8500,
-      "GIOVAN BIRU": 10500,
-      "GIOVAN PINK": 11000,
-      "HIDROCORTISON": 5500,
-      "HUFAXOL SYR": 6500,
-      "ITRABAT": 12500,
-      "KAOTIN SYR": 9500,
-      "KASSA KOTAK": 9000,
-      "KERTAS PUYER": 9500,
-      "KETOKONAZOLE CR": 4000,
-      "KETOKONAZOLE TAB": 25500,
-      "KLIP BESAR": 22000,
-      "KLIP SEDANG": 7500,
-      "LANSOPRAZOLE": 14000,
-      "METAMIZOLE": 35500,
-      "METRONIDAZOLE TAB": 25500,
-      "METYLPREDNISOLON 4": 25500,
-      "MIRATRIM SYR": 8000,
-      "MOLACORT 0,75": 33000,
-      "MYCROGYNON": 23500,
-      "NISAGON": 7500,
-      "OBH ITRASAL": 8000,
-      "OMEDOM": 25000,
-      "OMEDOM SYR": 6000,
-      "ONDANSETRON 4": 50000,
-      "ONDANSETRON 8": 75000,
-      "ONDANSETRON INJ": 4000,
-      "ORALIT": 34000,
-      "PACETIK": 23000,
-      "PACETIK SYR": 5500,
-      "PIROXICAM 20": 14000,
-      "PREDINSON POT": 11500,
-      "PREDNISON": 15000,
-      "PYREXIN 80 SUPP": 7500,
-      "QUANTIDEX SYR": 9000,
-      "RANITIDIN": 23000,
-      "RANITIDIN INJ": 6500,
-      "ROVERTON SYR": 6000,
-      "SALBRON 2MG": 25500,
-      "SALBRON 4MG": 27500,
-      "SAMCONAL": 18500,
-      "SELTIFORT SYR": 7500,
-      "SPASMINAL": 78000,
-      "SUCRALFATE SYR": 13000,
-      "TERNIK PLUS SYR": 7500,
-      "TERNIK SYR": 7000,
-      "TRIANTA": 26500,
-      "TRIANTA SYR": 8000,
-      "VESPERUM DROP": 13000,
-      "VESPERUM SYR": 8000,
-      "ZENSODERM": 7500,
-      "ZULTROP": 32500,
-      "TRISELA SYR": 7500,
-      "MIRASIC TAB": 32000,
-      "ASMEF HJ": 25000,
-      "VITAMIN C POT": 28000
+      "ACYCLOVIR 400": 56500, "ACYCLOVIR CR": 4000, "ALLOPURINOL": 20500,
+      "AMLODIPIN 10MG HJ": 49000, "AMLODIPIN 5MG HJ": 26500, "ANDALAN PIL": 15500,
+      "ANTASIDA POT": 9000, "AXAPROFEN": 44000, "BINTAMOX SYR": 9000,
+      "BIOPLACENTON": 29000, "CALCIFAR": 21000, "CALCIFAR PLUS": 23000,
+      "CAVIPLEX SYR": 12000, "CEFIXIM SYR": 11000, "CETERIZIN": 24500,
+      "CETERIZIN SYR": 5500, "COMBANTRIN CAIR": 27500, "CTM": 10000,
+      "CTM POT": 4000, "DEXAMETHASON 0,5": 9000, "DEXTAF": 20500,
+      "DEXTEEM PLUS": 31500, "DICLOFENAC SODIUM": 21000, "EMTURNAS TAB": 23500,
+      "ERLA SM": 12000, "ERLA TM": 12000, "ERPHAFLAM": 23000,
+      "ETABION": 29000, "ETAMOX": 60500, "ETAMOX FORTE SYR": 10500,
+      "ETAMOX SYR": 7500, "FASIDOL FORTE SYR": 8000, "FLACOID 0,5 POT": 5500,
+      "FLUCADEX SYR": 10500, "GASTRUCID SYR": 8500, "GIOVAN BIRU": 10500,
+      "GIOVAN PINK": 11000, "HIDROCORTISON": 5500, "HUFAXOL SYR": 6500,
+      "ITRABAT": 12500, "KAOTIN SYR": 9500, "KASSA KOTAK": 9000,
+      "KERTAS PUYER": 9500, "KETOKONAZOLE CR": 4000, "KETOKONAZOLE TAB": 25500,
+      "KLIP BESAR": 22000, "KLIP SEDANG": 7500, "LANSOPRAZOLE": 14000,
+      "METAMIZOLE": 35500, "METRONIDAZOLE TAB": 25500, "METYLPREDNISOLON 4": 25500,
+      "MIRATRIM SYR": 8000, "MOLACORT 0,75": 33000, "MYCROGYNON": 23500,
+      "NISAGON": 7500, "OBH ITRASAL": 8000, "OMEDOM": 25000,
+      "OMEDOM SYR": 6000, "ONDANSETRON 4": 50000, "ONDANSETRON 8": 75000,
+      "ONDANSETRON INJ": 4000, "ORALIT": 34000, "PACETIK": 23000,
+      "PACETIK SYR": 5500, "PIROXICAM 20": 14000, "PREDINSON POT": 11500,
+      "PREDNISON": 15000, "PYREXIN 80 SUPP": 7500, "QUANTIDEX SYR": 9000,
+      "RANITIDIN": 23000, "RANITIDIN INJ": 6500, "ROVERTON SYR": 6000,
+      "SALBRON 2MG": 25500, "SALBRON 4MG": 27500, "SAMCONAL": 18500,
+      "SELTIFORT SYR": 7500, "SPASMINAL": 78000, "SUCRALFATE SYR": 13000,
+      "TERNIK PLUS SYR": 7500, "TERNIK SYR": 7000, "TRIANTA": 26500,
+      "TRIANTA SYR": 8000, "VESPERUM DROP": 13000, "VESPERUM SYR": 8000,
+      "ZENSODERM": 7500, "ZULTROP": 32500, "TRISELA SYR": 7500,
+      "MIRASIC TAB": 32000, "ASMEF HJ": 25000, "VITAMIN C POT": 28000
     };
 
-   const selectEl = document.getElementById('obatSelect');
-    const tbodyEl = document.querySelector('#keranjang tbody');
-    const totalEl = document.getElementById('totalHarga');
+    const keranjang = [];
 
-    // Isi dropdown dari daftar obat
-    for (const nama in daftarObat) {
-      const option = document.createElement('option');
+    const selectObat = document.getElementById("obat");
+    const keranjangList = document.getElementById("keranjang");
+    const totalElement = document.getElementById("total");
+
+    // Isi dropdown
+    for (let nama in daftarObat) {
+      const option = document.createElement("option");
       option.value = nama;
-      option.textContent = nama + " - Rp " + formatRupiah(daftarObat[nama]);
-      selectEl.appendChild(option);
+      option.textContent = `${nama} - Rp ${daftarObat[nama].toLocaleString()}`;
+      selectObat.appendChild(option);
     }
 
-    let keranjang = [];
+    function tambahKeranjang() {
+      const nama = selectObat.value;
+      const jumlah = parseInt(document.getElementById("jumlah").value);
+      const harga = daftarObat[nama];
+      keranjang.push({ nama, jumlah, harga });
+      renderKeranjang();
+    }
 
-    function tambahObat() {
-      const selected = selectEl.value;
-      if (!selected) return;
-      keranjang.push({ nama: selected, harga: daftarObat[selected] });
-      updateKeranjang();
+    function renderKeranjang() {
+      keranjangList.innerHTML = "";
+      let total = 0;
+      keranjang.forEach((item, i) => {
+        const li = document.createElement("li");
+        li.className = "list-group-item d-flex justify-content-between align-items-center";
+        li.textContent = `${item.nama} x ${item.jumlah}`;
+        const span = document.createElement("span");
+        span.textContent = `Rp ${(item.harga * item.jumlah).toLocaleString()}`;
+        li.appendChild(span);
+        keranjangList.appendChild(li);
+        total += item.harga * item.jumlah;
+      });
+      totalElement.textContent = total.toLocaleString();
     }
 
     function resetKeranjang() {
-      if (confirm("Yakin ingin mengosongkan keranjang?")) {
-        keranjang = [];
-        updateKeranjang();
+      if (confirm("Apakah Anda yakin ingin menghapus semua isi keranjang?")) {
+        keranjang.length = 0;
+        renderKeranjang();
       }
     }
 
-    function updateKeranjang() {
-      tbodyEl.innerHTML = '';
-      let total = 0;
-      keranjang.forEach(item => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${item.nama}</td>
-          <td>Rp ${formatRupiah(item.harga)}</td>
-        `;
-        tbodyEl.appendChild(row);
-        total += item.harga;
+    function saveToPDF() {
+      import('jspdf').then(jsPDF => {
+        html2canvas(document.getElementById("keranjang-container")).then(canvas => {
+          const imgData = canvas.toDataURL("image/png");
+          const pdf = new jsPDF.jsPDF();
+          const imgProps = pdf.getImageProperties(imgData);
+          const pdfWidth = pdf.internal.pageSize.getWidth();
+          const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+          pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+          pdf.save("keranjang.pdf");
+        });
       });
-      totalEl.textContent = "Total: Rp " + formatRupiah(total);
     }
 
-    function formatRupiah(angka) {
-      return angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    function saveAsImage() {
+      html2canvas(document.getElementById("keranjang-container")).then(canvas => {
+        const link = document.createElement("a");
+        link.download = "keranjang.png";
+        link.href = canvas.toDataURL();
+        link.click();
+      });
+    }
+
+    function printPage() {
+      window.print();
     }
   </script>
-
 </body>
 </html>
