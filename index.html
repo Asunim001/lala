@@ -181,17 +181,6 @@
       document.getElementById("totalHarga").textContent = `Rp ${total.toLocaleString('id-ID')}`;
     }
 
-    function saveToPDF() {
-      const element = document.getElementById("kasirContainer");
-      html2pdf().set({
-        margin: 0.5,
-        filename: `transaksi_${new Date().toLocaleDateString("id-ID")}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-      }).from(element).save();
-    }
-
     function saveAsImage() {
       const tanggal = document.getElementById("tanggalTransaksi").cloneNode(true);
       const keranjang = document.getElementById("keranjangWrapper").cloneNode(true);
@@ -213,9 +202,7 @@
       });
     }
 
-    function printPage() {
-      window.print();
-    }
+    
   </script>
 </body>
 </html>
