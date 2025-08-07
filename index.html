@@ -83,7 +83,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <script>
-      const dataObat = `ACYCLOVIR 400	56500
+    const rawData = `ACYCLOVIR 400	56500
 ACYCLOVIR CR	4000
 ALLOPURINOL 	20500
 AMLODIPIN 10MG HJ	49000
@@ -173,6 +173,15 @@ TRISELA SYR	7500
 MIRASIC TAB	32000
 ASMEF HJ	25000
 VITAMIN C POT	28000`;
+
+    // Konversi data mentah menjadi object
+    const daftarObat = {};
+    rawData.split('\n').forEach(line => {
+      const [nama, harga] = line.trim().split(/\t+/);
+      if (nama && harga) {
+        daftarObat[nama.trim()] = parseInt(harga.trim());
+      }
+    });
 
     $(document).ready(function () {
       for (const [nama, harga] of Object.entries(daftarObat)) {
