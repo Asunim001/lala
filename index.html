@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Apotek Meysha<title>
+  <title>Apotek Meysha</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
   <style>
@@ -91,100 +91,22 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <script>
-    const rawData = ACYCLOVIR 400	56500
-ACYCLOVIR CR	4000
-ALLOPURINOL 	20500
-AMLODIPIN 10MG HJ	49000
-AMLODIPIN 5MG HJ	26500
-ANDALAN PIL	15500
-ANTASIDA POT	9000
-AXAPROFEN 	44000
-BINTAMOX SYR	9000
-BIOPLACENTON	29000
-CALCIFAR	21000
-CALCIFAR PLUS	23000
-CAVIPLEX SYR	12000
-CEFIXIM SYR	11000
-CETERIZIN 	24500
-CETERIZIN SYR	5500
-COMBANTRIN CAIR	27500
-CTM 	10000
-CTM POT	4000
-DEXAMETHASON 0,5	9000
-DEXTAF	20500
-DEXTEEM PLUS	31500
-DICLOFENAC SODIUM	21000
-EMTURNAS TAB	23500
-ERLA SM	12000
-ERLA TM	12000
-ERPHAFLAM	23000
-ETABION	29000
-ETAMOX	60500
-ETAMOX FORTE SYR	10500
-ETAMOX SYR	7500
-FASIDOL FORTE SYR 	8000
-FLACOID 0,5 POT	5500
-FLUCADEX SYR	10500
-GASTRUCID SYR	8500
-GIOVAN BIRU	10500
-GIOVAN PINK	11000
-HIDROCORTISON	5500
-HUFAXOL SYR	6500
-ITRABAT	12500
-KAOTIN SYR	9500
-KASSA KOTAK	9000
-KERTAS PUYER	9500
-KETOKONAZOLE CR	4000
-KETOKONAZOLE TAB	25500
-KLIP BESAR	22000
-KLIP SEDANG	7500
-LANSOPRAZOLE	14000
-METAMIZOLE	35500
-METRONIDAZOLE TAB	25500
-METYLPREDNISOLON 4	25500
-MIRATRIM SYR	8000
-MOLACORT 0,75	33000
-MYCROGYNON	23500
-NISAGON 	7500
-OBH ITRASAL	8000
-OMEDOM	25000
-OMEDOM SYR	6000
-ONDANSETRON 4	50000
-ONDANSETRON 8	75000
-ONDANSETRON INJ	4000
-ORALIT	34000
-PACETIK	23000
-PACETIK SYR	5500
-PIROXICAM 20	14000
-PREDINSON POT	11500
-PREDNISON	15000
-PYREXIN 80 SUPP	7500
-QUANTIDEX SYR	9000
-RANITIDIN	23000
-RANITIDIN INJ	6500
-ROVERTON SYR	6000
-SALBRON 2MG	25500
-SALBRON 4MG	27500
-SAMCONAL	18500
-SELTIFORT SYR	7500
-SPASMINAL	78000
-SUCRALFATE SYR	13000
-TERNIK PLUS SYR	7500
-TERNIK SYR	7000
-TRIANTA	26500
-TRIANTA SYR	8000
-VESPERUM DROP	13000
-VESPERUM SYR	8000
-ZENSODERM	7500
-ZULTROP	32500
-TRISELA SYR	7500
-MIRASIC TAB	32000
-ASMEF HJ	25000
-VITAMIN C POT	28000;
+    const daftarObat = {
+      "ACYCLOVIR 400MG TABLET NOVELL": 56500,
+      "ACYCLOVIR CREAM 5% 5G NOVELL": 4000,
+      "ALLOPURINOL TABLET 100MG GENERIK": 20500,
+      "AMLODIPINE 10MG TABLET HEXPHARM": 49000,
+      "AMLODIPINE 5MG TABLET HEXPHARM": 26500,
+      "ANDALAN PIL KB 28 TABLET": 15500,
+      "ANTASIDA TABLET POLIFARMA": 9000,
+      "AXAPROFEN TABLET 300MG NOVELL": 44000,
+      "BINTAMOX SYRUP 60ML": 9000,
+      "BIOPLACENTON SALP 15G KALBE": 29000
+    };
 
     $(document).ready(function () {
       for (const [nama, harga] of Object.entries(daftarObat)) {
-        $('#obat').append(<option value="${nama}">${nama} - Rp ${harga.toLocaleString('id-ID')}</option>);
+        $('#obat').append(`<option value="${nama}">${nama} - Rp ${harga.toLocaleString('id-ID')}</option>`);
       }
       $('#obat').select2({ theme: 'bootstrap5' });
 
@@ -214,22 +136,22 @@ VITAMIN C POT	28000;
         const subtotal = item.harga * item.jumlah;
         total += subtotal;
 
-        row.innerHTML = 
+        row.innerHTML = `
           <td>${item.nama}</td>
           <td>Rp ${item.harga.toLocaleString('id-ID')}</td>
           <td>${item.jumlah}</td>
           <td>Rp ${subtotal.toLocaleString('id-ID')}</td>
-        ;
+        `;
         tbody.appendChild(row);
       });
-      document.getElementById("totalHarga").textContent = Rp ${total.toLocaleString('id-ID')};
+      document.getElementById("totalHarga").textContent = `Rp ${total.toLocaleString('id-ID')}`;
     }
 
     function saveToPDF() {
       const element = document.getElementById("kasirContainer");
       html2pdf().set({
         margin: 0.5,
-        filename: transaksi_${new Date().toLocaleDateString("id-ID")}.pdf,
+        filename: `transaksi_${new Date().toLocaleDateString("id-ID")}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2 },
         jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
@@ -240,7 +162,7 @@ VITAMIN C POT	28000;
       const element = document.getElementById("kasirContainer");
       html2canvas(element).then(canvas => {
         const link = document.createElement('a');
-        link.download = transaksi_${new Date().toLocaleDateString("id-ID")}.png;
+        link.download = `transaksi_${new Date().toLocaleDateString("id-ID")}.png`;
         link.href = canvas.toDataURL("image/png");
         link.click();
       });
