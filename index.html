@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Apotek Meysha</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Select2 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
   <style>
     .select2-container--bootstrap5 .select2-selection {
       min-height: 38px;
@@ -15,15 +19,18 @@
       body * {
         visibility: hidden;
       }
+
       #keranjangWrapper, #keranjangWrapper *, #tanggalTransaksi {
         visibility: visible;
       }
+
       #keranjangWrapper {
         position: absolute;
-        left: 0;
         top: 2cm;
+        left: 0;
         width: 100%;
       }
+
       #tanggalTransaksi {
         position: absolute;
         top: 0;
@@ -35,6 +42,7 @@
     }
   </style>
 </head>
+
 <body class="bg-light">
   <div class="container py-5">
     <div class="card p-4" id="kasirContainer">
@@ -48,7 +56,7 @@
 
       <div class="mb-3">
         <label for="jumlah" class="form-label">Jumlah</label>
-        <input type="number" id="jumlah" class="form-control" min="1" value="1">
+        <input type="number" id="jumlah" class="form-control" min="1" value="1" />
       </div>
 
       <button class="btn btn-primary mb-4" onclick="tambahObat()">Tambah ke Keranjang</button>
@@ -84,6 +92,7 @@
     </div>
   </div>
 
+  <!-- Scripts -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
@@ -91,52 +100,56 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <script>
+    // Daftar harga obat
     const daftarObat = {
-       "ACYCLOVIR 400": 56330, "ACYCLOVIR CR": 3930, "ALLOPURINOL": 20305,
-    "AMLODIPIN 10MG HJ": 48470, "AMLODIPIN 5MG HJ": 26200, "ANDALAN PIL": 15500,
-    "ANTASIDA POT": 9170, "AXAPROFEN": 43885, "BINTAMOX SYR": 9170,
-    "BIOPLACENTON": 28820, "CALCIFAR": 20960, "CALCIFAR PLUS": 22270,
-    "CAVIPLEX SYR": 11790, "CEFIXIM SYR": 11135, "CETERIZIN": 24235,
-    "CETERIZIN SYR": 5240, "COMBANTRIN CAIR": 27510, "CTM": 9825,
-    "CTM POT": 3930, "DEXAMETHASON 0,5": 9170, "DEXTAF": 20305,
-    "DEXTEEM PLUS": 31440, "DICLOFENAC SODIUM": 20960, "EMTURNAS TAB": 23580,
-    "ERLA SM": 11790, "ERLA TM": 11790, "ERPHAFLAM": 22270,
-    "ETABION": 28820, "ETAMOX": 60260, "ETAMOX FORTE SYR": 10480,
-    "ETAMOX SYR": 7205, "FASIDOL FORTE SYR": 7860, "FLACOID 0,5 POT": 5240,
-    "FLUCADEX SYR": 10500, "GASTRUCID SYR": 8515, "GIOVAN BIRU": 10480,
-    "GIOVAN PINK": 11135, "HIDROCORTISON": 5240, "HUFAXOL SYR": 6550,
-    "ITRABAT": 12445, "KAOTIN SYR": 9170, "KASSA KOTAK": 3144,
-    "KERTAS PUYER": 9563, "KETOKONAZOLE CR": 3930, "KETOKONAZOLE TAB": 25545,
-    "KLIP BESAR": 22000, "KLIP SEDANG": 7500, "LANSOPRAZOLE": 13755,
-    "METAMIZOLE": 35370, "METRONIDAZOLE TAB": 25545, "METYLPREDNISOLON 4": 25545,
-    "MIRATRIM SYR": 7860, "MOLACORT 0,75": 32750, "MYCROGYNON": 23500,
-    "NISAGON": 7205, "OBH ITRASAL": 8000, "OMEDOM": 24235,
-    "OMEDOM SYR": 5895, "ONDANSETRON 4": 49780, "ONDANSETRON 8": 74670,
-    "ONDANSETRON INJ": 4000, "ORALIT": 34060, "PACETIK": 22925,
-    "PACETIK SYR": 5240, "PIROXICAM 20": 13755, "PREDINSON POT": 11135,
-    "PREDNISON": 15065, "PYREXIN 80 SUPP": 7205, "QUANTIDEX SYR": 9170,
-    "RANITIDIN": 22925, "RANITIDIN INJ": 6500, "ROVERTON SYR": 5895,
-    "SALBRON 2MG": 25545, "SALBRON 4MG": 27510, "SAMCONAL": 18500,
-    "SELTIFORT SYR": 7205, "SPASMINAL": 78000, "SUCRALFATE SYR": 13100,
-    "TERNIK PLUS SYR": 7500, "TERNIK SYR": 7000, "TRIANTA": 26200,
-    "TRIANTA SYR": 8000, "VESPERUM DROP": 13100, "VESPERUM SYR": 8000,
-    "ZENSODERM": 7205, "ZULTROP": 32500, "TRISELA SYR": 7205,
-    "MIRASIC TAB": 32095, "ASMEF HJ": 24890, "VITAMIN C POT": 28165
-  };
+      "ACYCLOVIR 400": 56500, "ACYCLOVIR CR": 4000, "ALLOPURINOL": 20500,
+      "AMLODIPIN 10MG HJ": 49000, "AMLODIPIN 5MG HJ": 26500, "ANDALAN PIL": 15500,
+      "ANTASIDA POT": 9000, "AXAPROFEN": 44000, "BINTAMOX SYR": 9000,
+      "BIOPLACENTON": 29000, "CALCIFAR": 21000, "CALCIFAR PLUS": 23000,
+      "CAVIPLEX SYR": 12000, "CEFIXIM SYR": 11000, "CETERIZIN": 24500,
+      "CETERIZIN SYR": 5500, "COMBANTRIN CAIR": 27500, "CTM": 10000,
+      "CTM POT": 4000, "DEXAMETHASON 0,5": 9000, "DEXTAF": 20500,
+      "DEXTEEM PLUS": 31500, "DICLOFENAC SODIUM": 21000, "EMTURNAS TAB": 23500,
+      "ERLA SM": 12000, "ERLA TM": 12000, "ERPHAFLAM": 23000,
+      "ETABION": 29000, "ETAMOX": 60500, "ETAMOX FORTE SYR": 10500,
+      "ETAMOX SYR": 7500, "FASIDOL FORTE SYR": 8000, "FLACOID 0,5 POT": 5500,
+      "FLUCADEX SYR": 10500, "GASTRUCID SYR": 8500, "GIOVAN BIRU": 10500,
+      "GIOVAN PINK": 11000, "HIDROCORTISON": 5500, "HUFAXOL SYR": 6500,
+      "ITRABAT": 12500, "KAOTIN SYR": 9500, "KASSA KOTAK": 9000,
+      "KERTAS PUYER": 9500, "KETOKONAZOLE CR": 4000, "KETOKONAZOLE TAB": 25500,
+      "KLIP BESAR": 22000, "KLIP SEDANG": 7500, "LANSOPRAZOLE": 14000,
+      "METAMIZOLE": 35500, "METRONIDAZOLE TAB": 25500, "METYLPREDNISOLON 4": 25500,
+      "MIRATRIM SYR": 8000, "MOLACORT 0,75": 33000, "MYCROGYNON": 23500,
+      "NISAGON": 7500, "OBH ITRASAL": 8000, "OMEDOM": 25000,
+      "OMEDOM SYR": 6000, "ONDANSETRON 4": 50000, "ONDANSETRON 8": 75000,
+      "ONDANSETRON INJ": 4000, "ORALIT": 34000, "PACETIK": 23000,
+      "PACETIK SYR": 5500, "PIROXICAM 20": 14000, "PREDINSON POT": 11500,
+      "PREDNISON": 15000, "PYREXIN 80 SUPP": 7500, "QUANTIDEX SYR": 9000,
+      "RANITIDIN": 23000, "RANITIDIN INJ": 6500, "ROVERTON SYR": 6000,
+      "SALBRON 2MG": 25500, "SALBRON 4MG": 27500, "SAMCONAL": 18500,
+      "SELTIFORT SYR": 7500, "SPASMINAL": 78000, "SUCRALFATE SYR": 13000,
+      "TERNIK PLUS SYR": 7500, "TERNIK SYR": 7000, "TRIANTA": 26500,
+      "TRIANTA SYR": 8000, "VESPERUM DROP": 13000, "VESPERUM SYR": 8000,
+      "ZENSODERM": 7500, "ZULTROP": 32500, "TRISELA SYR": 7500,
+      "MIRASIC TAB": 32000, "ASMEF HJ": 25000, "VITAMIN C POT": 28000
+    };
+
+    let keranjang = [];
 
     $(document).ready(function () {
+      // Isi dropdown obat
       for (const [nama, harga] of Object.entries(daftarObat)) {
         $('#obat').append(`<option value="${nama}">${nama} - Rp ${harga.toLocaleString('id-ID')}</option>`);
       }
+
       $('#obat').select2({ theme: 'bootstrap5' });
 
+      // Tampilkan tanggal sekarang
       document.getElementById("tanggalTransaksi").textContent =
         "Tanggal: " + new Date().toLocaleDateString("id-ID", {
           weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
         });
     });
-
-    let keranjang = [];
 
     function tambahObat() {
       const nama = document.getElementById("obat").value;
@@ -152,10 +165,10 @@
       let total = 0;
 
       keranjang.forEach(item => {
-        const row = document.createElement("tr");
         const subtotal = item.harga * item.jumlah;
         total += subtotal;
 
+        const row = document.createElement("tr");
         row.innerHTML = `
           <td>${item.nama}</td>
           <td>Rp ${item.harga.toLocaleString('id-ID')}</td>
@@ -164,6 +177,7 @@
         `;
         tbody.appendChild(row);
       });
+
       document.getElementById("totalHarga").textContent = `Rp ${total.toLocaleString('id-ID')}`;
     }
 
@@ -179,12 +193,23 @@
     }
 
     function saveAsImage() {
-      const element = document.getElementById("kasirContainer");
-      html2canvas(element).then(canvas => {
+      const tanggal = document.getElementById("tanggalTransaksi").cloneNode(true);
+      const keranjang = document.getElementById("keranjangWrapper").cloneNode(true);
+
+      const wrapper = document.createElement("div");
+      wrapper.style.padding = "20px";
+      wrapper.style.background = "white";
+      wrapper.appendChild(tanggal);
+      wrapper.appendChild(keranjang);
+
+      document.body.appendChild(wrapper);
+
+      html2canvas(wrapper).then(canvas => {
         const link = document.createElement('a');
-        link.download = `transaksi_${new Date().toLocaleDateString("id-ID")}.png`;
+        link.download = `keranjang_${new Date().toLocaleDateString("id-ID")}.png`;
         link.href = canvas.toDataURL("image/png");
         link.click();
+        document.body.removeChild(wrapper);
       });
     }
 
